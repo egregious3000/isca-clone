@@ -113,7 +113,7 @@ new_user(void)
   int salt;
   char saltc[3];
   long usernum;
-  int hold = 5;
+  int hold = 0;
 
   termset();
 
@@ -342,10 +342,10 @@ new_user(void)
       break;
     printf("\n\n\nOK, we'll start again from the beginning.  Now that you know what we need, it\nshould go much more quickly this time...(and we'll make the pauses shorter for\nyou since you now hopefully know what you are doing!)\n\n\n");
     flush_input(hold);
-    hold = 2;
+    hold = 0;
   }
 
-  hold = 5;
+  hold = 0;
 
   help("new.anonymous", NO);
   mysleep(hold);
