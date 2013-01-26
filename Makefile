@@ -10,12 +10,12 @@ SRCS= shell.c user.c system.c sysutil.c setup.c doc.c doc_msgs.c doc_rooms.c doc
 OBJS= $(SRCS:.c=.o)
 
 .c.o:
-	cc -c $< $(OPT) $(DEFS) $(CFLAGS)
+	cc -c $< $(OPT) $(DEFS) $(CFLAGS) -g -ggdb
 
 all:	bbs
 
 bbs:	$(OBJS)
-	cc -o bbs $(OBJS) -lcrypt -lcap
+	cc -o bbs $(OBJS) -lcrypt -lcap -g -ggdb
 
 clean:
 	rm -f bbs $(OBJS)
