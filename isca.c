@@ -1,6 +1,3 @@
-
-
-/* Functions mostly cut-and-pasted from other files. */
 #include "defs.h"
 #include "ext.h"
 
@@ -10,20 +7,30 @@ void my_createroom(const char *newroom, int rm_nbr, char opt);
 void
 clone_populate(void)
 {
-  FILE *f = fopen("data/list", "r");
+  FILE *f = fopen("/tmp/list", "r");
   char line[500];
   char *t;
+  char topic[100];
+  int number;
+
+  if (!f) {
+    perror("cannot open forum list");
+    return;
+  }
+
   while (fgets(line, sizeof line, f)) {
-    /*     char *strtok(char *str, const char *delim); */
-    strtok(line, "\t");
-    while ((t = strtok(NULL, "\t"))) {
-      printf("\t%s\n", t);
-    }
-    printf("\n");
+    if (line[0] == '.')
+      break;
+    t = strtok(line, "\t\n");
+    number = atoi(t+6);
+    t = strtok(NULL, "\t\n");
+    snprintf(topic, sizeof topic, "%s", t+5);
+    my_createroom(topic, number, '1');
   }
 }
 
 
+/* Functions mostly cut-and-pasted from other files. */
 
 
 /* from doc_aide.c
@@ -32,8 +39,6 @@ clone_populate(void)
  * - number
  * - type as char ('1' public, '2' guessname, '3' adult, '4' invitation)
  */
-
-#define DEBUG_ISCA 1
 
 void
 my_createroom(const char *newroom, int     rm_nbr, char opt)
@@ -75,7 +80,7 @@ char filename[80];
 
   printf(" forum\n");
 
-#if DEBUG_ISCA
+#ifdef DEBUG_ISCA
   return;
 #endif
 
@@ -144,9 +149,6 @@ char filename[80];
 
   printf(" forum\n");
 
-  /* Join user to the room that was just created */
-  ouruser->forget[curr] = TWILIGHTZONE;
-  ouruser->generation[curr] = msg->room[curr].gen;
 
   return;
 }
