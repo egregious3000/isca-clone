@@ -180,6 +180,7 @@ char filename[80];
 
   printf("\n\n\042%s\042, will be a", newroom);
 
+  /* This is a bug!!  It never gets used!! */ 
   switch (opt)
   {
     case 1:
