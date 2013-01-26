@@ -7,6 +7,8 @@ DEFS=-D_GNU_SOURCE
 CFLAGS=-Wall -ansi -Wstrict-prototypes -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wmissing-prototypes -Wnested-externs -Winline -Waggregate-return -Wundef -Wdeclaration-after-statement -Wendif-labels -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wold-style-definition -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wpadded
 
 SRCS= shell.c user.c system.c sysutil.c setup.c doc.c doc_msgs.c doc_rooms.c doc_routines.c xmsg.c doc_aide.c term.c state.c netio.c who.c finger.c users.c syncer.c update.c backup.c queue.c qmisc.c qrunbbs.c qstate.c utility.c main.c global.c linux.c endian.c
+# new sources for ISCA-clone
+SRCS+= isca.c
 OBJS= $(SRCS:.c=.o)
 
 .c.o:
