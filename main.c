@@ -64,6 +64,10 @@ main(register int argc, register char **argv)
         cmd = UPDATE;
         break;
 
+      case 'c':
+        cmd = POPULATECLONE;
+        break;
+
       default:
         _exit(1);
         break;
@@ -102,6 +106,10 @@ main(register int argc, register char **argv)
 
       case QUEUE:
         bbsqueue(getenv("INIT_VERSION") ? 0 : 1);
+	break;
+
+      case POPULATECLONE:
+        clone_populate();
 	break;
 
       default:

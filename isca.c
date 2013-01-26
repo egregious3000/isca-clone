@@ -4,7 +4,26 @@
 #include "defs.h"
 #include "ext.h"
 
-void my_createroom(const char *newroom, int     rm_nbr, char opt);
+void clone_populate(void);
+void my_createroom(const char *newroom, int rm_nbr, char opt);
+
+void
+clone_populate(void)
+{
+  FILE *f = fopen("data/list", "r");
+  char line[500];
+  char *t;
+  while (fgets(line, sizeof line, f)) {
+    /*     char *strtok(char *str, const char *delim); */
+    strtok(line, "\t");
+    while ((t = strtok(NULL, "\t"))) {
+      printf("\t%s\n", t);
+    }
+    printf("\n");
+  }
+}
+
+
 
 
 /* from doc_aide.c

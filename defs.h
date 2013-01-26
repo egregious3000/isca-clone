@@ -66,5 +66,6 @@
 #define SYNC            5
 #define UPDATE          6
 #define BACKUP          7
+#define POPULATECLONE   8
 
 #define FLUSH(a,b)	((b = q->qt[a].nfrontp - q->qt[a].nbackp) ? (!ssend(a, (char *)q->qt[a].nbackp, b) ? ((q->qt[a].nbackp = q->qt[a].nfrontp = q->qt[a].netobuf), 0) : -1) : 0)
