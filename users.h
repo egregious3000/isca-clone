@@ -1,4 +1,4 @@
-#define MAXTOTALUSERS 102400
+#define MAXTOTALUSERS 1000
 
 
 /*

@@ -4,8 +4,8 @@
 
 /* Configuration constants */
 
-#define BBSUID       17328		/* UID of owner of all BBS files    */
-#define BBSGID       19			/* GID of owner of all BBS files */
+#define BBSUID      1001 /* 17328	*/	/* UID of owner of all BBS files    */
+#define BBSGID     1001 /*  19 */			/* GID of owner of all BBS files */
 #define NXCONF       60			/* Number of slots in X config */
 #define MAILMSGS     150		/* Number of mail messages per user */
 #define MSGSPERRM    150		/* Messages per room (>= MAILMSGS!!) */
