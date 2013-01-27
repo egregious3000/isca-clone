@@ -109,8 +109,9 @@ main(register int argc, register char **argv)
 	break;
 
       case POPULATECLONE:
-	if (FALSE) clone_populate_forums();
+	clone_populate_forums();
         clone_populate_posts();
+	clone_populate_users();
 	break;
 
       default:
