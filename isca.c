@@ -1,10 +1,12 @@
 #include "defs.h"
 #include "ext.h"
 
+void clone_populate_users(void);
 void clone_populate_forums(void);
 void clone_populate_posts(void);
 void my_createroom(const char *newroom, int rm_nbr, char opt);
 int my_entermessage(int troom, char *recipient, int msg_number, int mtype, int poster_id, time_t time_of_post);
+void my_createuser(const char *name, const char *pas,  long usernum, const char *real_name, const char *addr1, const char *city, const char *statename, const char *zip, const char* phone, const char *mail, int sysop, int programmer, int twit);
 
 void
 clone_populate_forums(void)
@@ -37,32 +39,31 @@ void
 clone_populate_posts(void) {
   FILE *f = fopen("/tmp/posts-3", "r");
   char line[500];
-  char *t;
-  char topic[100];
 
+  int forum = 0;
+  int post = 0;
+  int author = 0;
+  int in_body = 0;
+  time_t date = 0;
+  char *my_msg = message_buffer;
 
   if (!f) {
     perror("cannot open post list");
     return;
   }
 
-  int forum;
-  int post;
-  int author;
-  int in_body = 0;
-  time_t date;
-  char *msg = message_buffer;
-  bzero(msg, 70000);
+
+  bzero(my_msg, 70000);
   while (fgets(line, sizeof line, f) != NULL) {
     if (line[0] == '.') {
       my_entermessage(forum, NULL, post, MES_NORMAL, author, date);
       forum = post = author = date = in_body = 0;
-      msg = message_buffer;
-      bzero(msg, 70000);
+      my_msg = message_buffer;
+      bzero(my_msg, 70000);
       continue;
     }
     if (in_body)
-      strcat(msg, line);
+      strcat(my_msg, line);
     if (strncmp(line, "FORUM: ", 7) == 0)
       forum = atoi(line + 7);
     if (strncmp(line, "POST: ", 6) == 0)
@@ -79,25 +80,185 @@ clone_populate_posts(void) {
   printf("done\n");
 }
 
+void
+clone_populate_users(void)
+{
+  FILE *f = fopen("/tmp/profiles", "r");
+  char line[500];
+  int in_profile = 0;
+  int trying = 0;
+  int got_name = 0;
+  int sysop = 0;
+  int twit = 0;
+  char name[100];
+  int user_number = -1;
+  if (!f) {
+    perror("cannot open profile");
+    return;
+  }
+
+  /* Not great, but decent for something like this. If someone gets
+     the password file salting really isn't going to stop someone from
+     brute-forcing 8 character passwords anyway.*/
+  srand(getpid() * 9);
+  srand(rand() + time(NULL));
+  
+  while (fgets(line, sizeof line, f) != NULL) {
+    if (!in_profile && strncmp("User to profile", line, 15) == 0) {
+      if (strlen(line) <= 49)
+	break;
+      trying = 1;
+      continue;
+    }
+    if (trying) {
+      trying = 0;
+      if (strncmp("There is no user", line, 16)) {
+	in_profile = 1;
+      }
+      continue;
+    }
+    if (!in_profile)
+      continue;
+    
+    if (!got_name) {
+      char *s;
+      strncpy(name, line, 98);
+      name[strlen(name)-1] = 0;
+      got_name = 1;
+      if ((s = strstr(name, "-TWIT-"))) {
+	twit = 1;
+	*(s-1) = 0;
+      }
+      if ((s = strstr(name, "*Sysop*"))) {
+	sysop = 1;
+	*(s-1) = 0;
+      }
+    }
+    if (strncmp("User# ", line, 6) == 0) {
+      user_number = atoi(line+6);
+      my_createuser(name, "abcdef", user_number, 
+		    "", "", "", "", "", "", "", sysop, 0, twit);
+      if (FALSE) printf("Number: %6d  %s  %s  Name: %s\n", 
+			user_number, 
+			twit ? "TWIT"   : "    ",
+			sysop ? "Sysop" : "     ",
+			name);
+      in_profile = trying = got_name = twit = sysop = 0;
+      continue;
+    }
+  }
+  printf("done\n");
+  return;
+
+
+}
+
 /* Functions mostly cut-and-pasted from other files. */
+
+/* need www */
+/* From system.c */
+void
+my_createuser(const char *name, const char *pas,  long usernum, 
+	      const char *real_name, const char *addr1, const char *city,
+	      const char *statename, const char *zip, const char* phone,
+	      const char *mail, int sysop, int programmer, int twit)
+/* still needs: anonymous flags, sys*/ 
+{
+  register int i;
+  register int c;
+  char pas2[14];
+  char work[80];
+  int anonymous = NO;
+  int salt;
+  char saltc[3];
+
+
+  salt = 9 * rand();
+  saltc[0] = salt & 077;
+  saltc[1] = (salt >> 6) & 077;
+  for (i = 0; i < 2; i++)
+  {
+    c = saltc[i] + '.';
+    if (c > '9')
+      c += 7;
+    if (c > 'Z')
+      c += 6;
+    saltc[i] = c;
+  }
+  saltc[2] = 0;
+  strcpy(pas2, crypt(pas, saltc));
+
+  locks(SEM_NEWBIE);
+  { 
+    int temp = msg->eternal + 1;
+    if (usernum > temp) 
+      msg->eternal = usernum;
+    else
+      msg->eternal = temp;
+  }
+  unlocks(SEM_NEWBIE);
+
+  { 
+    char tmpname[20];  /* non-const copy */ 
+    snprintf(tmpname, 19, "%s", name);
+    if (!(ouruser = adduser( tmpname, usernum)))
+      {
+	printf("Failed user creation of %s\n", name);
+	return;
+      } else {
+      printf("User made: %s\n", name);
+    }
+  }
+  bzero((void *)ouruser, sizeof(struct user));
+#define COPY(x) strncpy(ouruser->x, x, sizeof (ouruser->x))
+  
+  COPY(name);
+  strcpy(ouruser->passwd, pas2);
+  COPY(real_name);
+  COPY(addr1);
+  COPY(city);
+  strncpy(ouruser->state, statename, sizeof (ouruser->state));
+  COPY(zip);
+  COPY(phone);
+  COPY(mail);
+  ouruser->an_name = ouruser->an_addr = ouruser->an_location = ouruser->an_phone = ouruser->an_mail = anonymous;
+  ouruser->timescalled = 1;
+  ouruser->f_newbie = 0;
+  ouruser->f_prog = ouruser->f_admin = programmer; /* What is  f_admin ?? */
+  ouruser->f_aide = sysop;
+  ouruser->f_twit = twit;
+  for (i = 5; i < MAXROOMS; i++)
+    ouruser->generation[i] = ouruser->forget[i] = NEWUSERFORGET;
+  ouruser->time = time(NULL);
+  ouruser->usernum = usernum;
+
+  msync((void *)ouruser, sizeof(struct user), MS_SYNC);
+
+  strncpy(ouruser->remote, "import from ISCA", sizeof (ouruser->remote));
+  strcpy(ouruser->loginname, "");
+  /*   add_loggedin(ouruser); */
+  sprintf(work, "NEWUSER %s%s%s", ouruser->loginname, *ouruser->loginname ? "@" : "", ouruser->remote);
+  logevent(work);
+
+  ouruser->keytime = 0;
+}
+
 
 /* From doc_msgs.c */
 int
 my_entermessage(int troom, char *recipient, int msg_number, int mtype, int poster_id, time_t time_of_post)
 {
 int     curr_rm = troom;
-int     err;
 long    mmpos;
 long    mmhi;
 struct user *tmpuser = NULL;
-int     tosysop = NO;	/* message to sysop flag */
 int     len;
 struct mheader *mh;
 register int i;
 
 unsigned char *tmpp;
 unsigned char *tmpsave;
- printf("entering message %d in room %d at time %d\n", msg_number, troom, time_of_post);
+  printf("entering message %d in room %d \n", msg_number, troom);
   if (recipient)
   {
     printf("don't know how to handle recipients right now!\n");
