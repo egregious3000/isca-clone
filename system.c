@@ -424,10 +424,10 @@ new_user(void)
   
   hit_return_now();
   help("new.reminder", NO);
-  mysleep(20);
+  mysleep(1);
   hit_return_now();
   help("new.newinfo", NO);
-  mysleep(30);
+  mysleep(1);
   hit_return_now();
 
   if (ouruser->f_trouble)
