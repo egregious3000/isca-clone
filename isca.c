@@ -54,9 +54,10 @@ clone_populate_posts(void) {
 
 
   bzero(my_msg, 70000);
-  while (fgets(line, sizeof line, f) != NULL) {
-    if (line[0] == '.') {
-      my_entermessage(forum, NULL, post, MES_NORMAL, author, date);
+  while (fgets(line, sizeof (line), f)) {
+    int length = strlen(line);
+    if (line[0] == '.' && length == 2) {
+      if (1)      my_entermessage(forum, NULL, post, MES_NORMAL, author, date);
       forum = post = author = date = in_body = 0;
       my_msg = message_buffer;
       bzero(my_msg, 70000);
@@ -123,7 +124,7 @@ clone_populate_users(void)
     if (!got_name) {
       char *s;
       strncpy(name, line, 98);
-      name[strlen(name)-1] = 0;
+      name[strlen(name)-2] = 0;
       got_name = 1;
       if ((s = strstr(name, "-TWIT-"))) {
 	twit = 1;
@@ -136,7 +137,7 @@ clone_populate_users(void)
     }
     if (strncmp("User# ", line, 6) == 0) {
       user_number = atoi(line+6);
-      my_createuser(name, "abcdef", user_number, 
+      if (TRUE) my_createuser(name, "abcdef", user_number, 
 		    "", "", "", "", "", "", "", sysop, 0, twit);
       if (FALSE) printf("Number: %6d  %s  %s  Name: %s\n", 
 			user_number, 
@@ -298,10 +299,14 @@ unsigned char *tmpsave;
   mh->forum = troom;
   tmpp = tmpsave = tmpstart + mh->hlen;
   *tmpp = 0;		/* Marks end of message for pre-entering header */
-
+  /* good */
+  printf("source length is %d\n", strlen(message_buffer));
   if (TRUE) 
-    strncpy((char *) tmpp, message_buffer, 60000);
+    strncpy((char *) tmpp, message_buffer, 53248);
+    /*    memcpy(tmpp, message_buffer, strlen(message_buffer)); */
+    /*    strncpy((char *) tmpp, message_buffer, 53248); */
   mh->len = strlen(message_buffer);
+  /* bad */
   /* else */ 
     /*   readmessage(tmpstart, &auth, dummy, FALSE, 0); */ 
   
@@ -309,7 +314,7 @@ unsigned char *tmpsave;
   /* Done with subroutine */
   mh = (struct mheader *)(void *)tmpstart;
   len = (mh->hlen + mh->len + 4) & ~0x03;
-
+  /* bad */
   /* Touch to insure memory we'll need is paged in */
   mmpos = msg->curpos;
 #if 1
@@ -322,6 +327,8 @@ unsigned char *tmpsave;
     foo = *((char *)msgstart + mmpos + i) + *((char *)tmpstart + i); 
   }
   foo = poster_id;
+  
+  /* bad */
 
   locks(SEM_MSG);
 
@@ -381,7 +388,7 @@ char filename[80];
     printf("(Existing forum is %s, new forum would have been %s.\n", msg->room[rm_nbr].name, newroom);
     return;
   }
-
+  /*
   printf("\n\n\042%s\042, will be a", newroom);
 
   switch (opt)
@@ -401,7 +408,7 @@ char filename[80];
   }
 
   printf(" forum\n");
-
+  */
 #ifdef DEBUG_ISCA
   return;
 #endif
@@ -453,9 +460,7 @@ char filename[80];
 
   unlocks(SEM_MSG);
 
-  printf("Use edit description to assign forum moderator.\n");
-
-  printf("\n%s> (#%d) created as a", msg->room[curr].name, curr);
+  printf("%s> (#%d) created as a", msg->room[curr].name, curr);
 
   if (!(msg->room[curr].flags & QR_PRIVATE))
     printf(" public");
