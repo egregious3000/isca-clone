@@ -20,7 +20,9 @@ char    bueller = 0;
   setvbuf(stdout, (char *)stdoutbuf, _IOFBF, STDOUTBUFSIZ);
 
   init_system();
-
+  /* magic to set telnet into character mode */
+  /* IAC  DO LINEMODE, IAC WILL ECHO */
+  write(1,"\377\375\042\377\373\001",6);
   reserve_slot();
   do_login();
 
