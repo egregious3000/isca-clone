@@ -36,3 +36,4 @@ install:
 	rm -rf /bbs/message
 	mkdir -p /bbs/message
 	dd if=/dev/zero bs=4096 count=61036 of=/bbs/message/msgmain 2> /dev/null
+	# need to init xmsgdata size, and make FI directory
