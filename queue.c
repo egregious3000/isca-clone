@@ -24,6 +24,7 @@ cap_t cap_data;
   openlog("bbsqueued", LOG_PID, LOG_LOCAL0);
   q = bigbtmp;
 
+
   chdir("/bbs/core/bbsqueued");
   umask(027);
 
@@ -43,6 +44,7 @@ cap_t cap_data;
 
   if (q->pid != getpid() || !getenv("BBSQUEUED"))
   {
+
     bzero(q->qt, sizeof q->qt);
     q->qp = 0;
     q->oldqp = 0;
@@ -59,11 +61,16 @@ cap_t cap_data;
     q->cpuuser = 0;
     q->cpusys = 0;
     q->init_reread = 0;
-    if (dofork && fork())
-      _exit(0);
+    if (dofork && fork()) 
+	  _exit(0);
     q->pid = getpid();
-    for (i = getnumfds() - 1; i >= 0; i--)
-      close(i);
+    printf("numfds is %d\n", getnumfds());
+    for (i = getnumfds() - 1; i >= 3; i--) {
+      int temp;
+      temp = close(i);
+      close(2);
+      close(0);
+    }
     setsid();
     {
       struct rlimit rlp;
@@ -112,183 +119,52 @@ cap_t cap_data;
   if (!q->socks)
     bigbtmp->queued = 0;
 
-
-  for (;;)
-  {
-    if (q->connectable)
-      FD_SET(0, &q->fds);
-    else
-      FD_CLR(0, &q->fds);
-
-    for (i = 0, x = 3; x < MAXQ; x++)
-      if (q->qt[x].conn && !q->qt[x].ncc)
+  while (1) {
+    printf("waiting for conection\n");
+    struct sockaddr_in sa;
+    x = accept(0, &sa, &socklen);
+    printf("accept is %d\n", x);
+    if (x == -1)
+      continue;
+    printf("at line %d \n", __LINE__);
+    if (setsockopt(x, SOL_SOCKET, SO_OOBINLINE, &i, sizeof i) < 0)
       {
-        FD_SET(x, &q->fds);
-	i = x;
-      }
-      else
-        FD_CLR(x, &q->fds);
-
-    if (select(i + 1, &q->fds, 0, 0, 0) < 0)
-      i = errno;
-    else
-      i = 0;
-    q->t = time(0);
-    q->ltm = localtime(&q->t);
-    if (i)
-    {
-      if (i == EINTR)
-      {
-	if (f_term)
-	  do_quit();
-	if (f_qalarm)
-	  do_ring();
-	if (f_reread)
-	  do_reread();
-	if (f_quit)
-	  do_setup();
-	if (f_restart)
-	  do_restart();
-        runbbs(0);
-        continue;
-      }
-      else
-        logfatal("select: %m");
-    }
-
-    while (FD_ISSET(0, &q->fds))
-    {
-      struct sockaddr_in sa;
-
-      q->connectable--;
-      q->qt[0].last = q->t;
-      socklen = sizeof sa;
-      while ((x = accept(0, &sa, &socklen)) < 0)
-      {
-        if (errno == EINTR)
-	  continue;
-	if (errno == EMFILE)
-	{
-	  syslog(LOG_WARNING, "accept: %m");
-	  q->connectable = 0;
-	  break;
-	}
-        logfatal("accept: %m");
+	printf("at line %d \n", __LINE__);
+	syslog(LOG_WARNING, "setsockopt on fd %d SO_OOBINLINE: %m", x);
+	if (close(x) < 0)
+	  syslog(LOG_WARNING, "SO_OOBINLINE failure: close: %m");
+	continue;
       }
 
+    printf("at line %d \n", __LINE__);
+    if (setsockopt(x, SOL_SOCKET, SO_KEEPALIVE, &i, sizeof i) < 0)
       {
-        struct linger linger;
-
-        linger.l_onoff = 1;
-        linger.l_linger = 0;
-        if (setsockopt(x, SOL_SOCKET, SO_LINGER, &linger, sizeof linger) < 0)
-        {
-          syslog(LOG_WARNING, "setsockopt on fd %d SO_LINGER: %m", x);
-          if (close(x) < 0)
-            syslog(LOG_WARNING, "SO_LINGER failure: close: %m");
-          break;
-        }
+	syslog(LOG_WARNING, "setsockopt on fd %d SO_KEEPALIVE: %m", x);
+	if (close(x) < 0)
+	  syslog(LOG_WARNING, "SO_KEEPALIVE failure: close: %m");
+	continue;
       }
-      i = 1;
-      if (setsockopt(x, SOL_SOCKET, SO_OOBINLINE, &i, sizeof i) < 0)
-      {
-        syslog(LOG_WARNING, "setsockopt on fd %d SO_OOBINLINE: %m", x);
-        if (close(x) < 0)
-          syslog(LOG_WARNING, "SO_OOBINLINE failure: close: %m");
-        break;
-      }
-      if (setsockopt(x, SOL_SOCKET, SO_KEEPALIVE, &i, sizeof i) < 0)
-      {
-        syslog(LOG_WARNING, "setsockopt on fd %d SO_KEEPALIVE: %m", x);
-        if (close(x) < 0)
-          syslog(LOG_WARNING, "SO_KEEPALIVE failure: close: %m");
-        break;
-      }
-      if (fcntl(x, F_SETFL, O_NONBLOCK) < 0)
+    printf("at line %d \n", __LINE__);
+    if (fcntl(x, F_SETFL, O_NONBLOCK) < 0)
       {
         syslog(LOG_WARNING, "fcntl on fd %d: %m", x);
         if (close(x) < 0)
           syslog(LOG_WARNING, "fcntl failure: close: %m");
-        break;
-      }
-
-      q->socks++;
-
-      if (ssend(x, q->hello, q->hellolen - 1))
-        break;
-      if (q->down && sa.sin_addr.s_addr != htonl(0x7f000001))
-      {
-        drop(-x);
-        break;
-      }
-
-      q->qt[x].conn = q->qt[x].last = q->t;
-      q->qt[x].netip = q->qt[x].netibuf;
-      q->qt[x].nfrontp = q->qt[x].nbackp = q->qt[x].netobuf;
-      q->qt[x].subpointer = q->qt[x].subend = q->qt[x].subbuffer;
-      *q->qt[x].remoteusername = 0;
-      q->qt[x].rows = 24;
-      q->qt[x].initstate = T_INIT1;
-      q->qt[x].state = TS_DATA;
-      for (i = 0; i < sizeof q->qt[0].options; i++)
-        q->qt[x].options[i] = q->qt[x].do_dont_resp[i] = q->qt[x].will_wont_resp[i] = 0;
-      q->qt[x].ncc = 0;
-      q->qt[x].addr = ntohl(sa.sin_addr.s_addr);
-      q->qt[x].port = ntohs(sa.sin_port);
-      q->qt[x].acc = 0;
-      q->qt[x].login = 0;
-      q->qt[x].sgaloop = 0;
-      q->qt[x].echoloop = 0;
-      q->qt[x].client = 0;
-      q->qt[x].checkup = 0;
-      q->qt[x].new = 0;
-      q->qt[x].wasinq = 0;
-      break;
-    }
-
-    for (x = 3; x < MAXQ; x++)
-    {
-      if (!q->qt[x].conn)
-        continue;
-
-      if (FD_ISSET(x, &q->fds))
-      {
-        while ((q->qt[x].ncc = recv(x, q->qt[x].netibuf, sizeof q->qt[x].netibuf, 0)) < 0 && errno == EINTR)
-          ;
-        if (q->qt[x].ncc <= 0)
-	{
-          drop(x);
-	  continue;
-	}
-        q->qt[x].netip = q->qt[x].netibuf;
-        q->qt[x].last = q->t;
-      }
-
-      if (q->qt[x].ncc > 0)
-      {
-        qtelrcv(x);
-        if (!q->qt[x].conn)
-	  continue;
-      }
-
-      if (q->qt[x].checkup)
-      {
-        q->qt[x].checkup = 0;
-        runbbs(-x);
-      }
-
-      if (q->qt[x].initstate)
-      {
-        if (FLUSH(x, i) < 0)
-	  continue;
-        qinit(x);
-        if (!q->qt[x].conn)
-	  continue;
-      }
-
-      if (FLUSH(x, i) < 0)
 	continue;
-    }
-    runbbs(0);
+      }
+    printf("at line %d \n", __LINE__);
+    int d = (ssend(x, q->hello, q->hellolen - 1));
+    printf("d is %d\n", d);
+    /* continue; */
+    printf("at line %d \n", __LINE__);
+    if (0) 
+      if (sa.sin_addr.s_addr != htonl(0x7f000001))
+	continue;
+    printf("at line %d \n", __LINE__);
+
+    printf("closing\n");
+
+    runbbs(x); 
   }
 }
+
