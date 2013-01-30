@@ -1174,7 +1174,7 @@ genkey(struct user *up)
   logevent(junk);
 
   if (up == ouruser)
-    mysleep(15);
+    mysleep(1);
   printf("\n\nKey mailed.  Please allow anywhere from one to twelve hours for the mail to\nreach you.  If after 48 hours you still have received nothing, double check\nyour e-mail address to make sure it is correct, the BBS has no way of knowing\nwhether or not the mail address you gave was valid and the mail was sent\nsuccessfully.\n\n\n");
 }
 
