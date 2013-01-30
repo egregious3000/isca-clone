@@ -24,3 +24,15 @@ clean:
 
 
 $(OBJS): defs.h ext.h proto.h bbs.h telnet.h users.h queue.h qtelnet.h linux.h
+
+install:
+	mkdir -p /bbs
+	rm -rf /bbs/data
+	mkdir -p /bbs/data
+	dd if=/dev/zero bs=35515 count=16   of=/bbs/data/tmpdata  2> /dev/null
+	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/msgdata  2> /dev/null
+	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/xmsgdata 2> /dev/null
+	dd if=/dev/zero bs=4096 count=50000 of=/bbs/data/userdata 2> /dev/null
+	rm -rf /bbs/message
+	mkdir -p /bbs/message
+	dd if=/dev/zero bs=4096 count=61036 of=/bbs/message/msgmain 2> /dev/null
