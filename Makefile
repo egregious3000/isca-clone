@@ -37,3 +37,13 @@ install:
 	mkdir -p /bbs/message
 	dd if=/dev/zero bs=4096 count=61036 of=/bbs/message/msgmain 2> /dev/null
 	# need to init xmsgdata size, and make FI directory
+
+NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup.c shell.c state.c system.c sysutil.c term.c update.c user.c users.c who.c xmsg.c
+
+
+# \n to \r\n
+n2rn:
+       perl -pi.bak \
+          -e "s/(?<!\\\\r)\\\\n/\\\\r\\\n/g" \
+        ${NEWLINE_SRCS}
+
