@@ -1,10 +1,10 @@
 #include "defs.h"
 #include "ext.h"
 
-void clone_populate_users(void);
 void clone_populate_forums(void);
 void clone_populate_posts(void);
-void my_createroom(const char *newroom, int rm_nbr, char opt);
+void clone_populate_users(void);
+void my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags);
 int my_entermessage(int troom, char *recipient, int msg_number, int mtype, int poster_id, time_t time_of_post);
 void my_createuser(const char *name, const char *pas,  long usernum, const char *real_name, const char *addr1, const char *city, const char *statename, const char *zip, const char* phone, const char *mail, int sysop, int programmer, int twit);
 
@@ -16,6 +16,8 @@ clone_populate_forums(void)
   char *t;
   char topic[100];
   int number;
+  char opt = '1';
+  unsigned int flags = 0;
 
   if (!f) {
     perror("cannot open forum list");
@@ -29,7 +31,17 @@ clone_populate_forums(void)
     number = atoi(t+6);
     t = strtok(NULL, "\t\n");
     snprintf(topic, sizeof topic, "%s", t+5);
-    my_createroom(topic, number, '1');
+    t = strtok(NULL, "\t\n"); /* last note */
+    t = strtok(NULL, "\t\n"); /* flags */
+    if (strstr(t, "private"))
+      opt = '4';
+    if (strstr(t, "forceanonymous"))
+      flags |= QR_ANONONLY;
+    if (strstr(t, "cananonymous"))
+      flags |= QR_ANON2;
+	       
+    my_createroom(topic, number, opt, flags);
+    opt = '1';
   }
 }
 
@@ -37,7 +49,7 @@ char message_buffer[70000];
 
 void
 clone_populate_posts(void) {
-  FILE *f = fopen("/tmp/posts-3", "r");
+  FILE *f = fopen("/tmp/posts", "r");
   char line[500];
 
   int forum = 0;
@@ -370,7 +382,7 @@ unsigned char *tmpsave;
  */
 
 void
-my_createroom(const char *newroom, int     rm_nbr, char opt)
+my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags)
 {
 register int i;
 int     found;
@@ -450,6 +462,8 @@ char filename[80];
     msg->room[curr].flags |= QR_GUESSNAME;
   if (opt == '3')
     msg->room[curr].flags |= QR_MINOR;
+
+  msg->room[curr].flags |= flags;
 
   for (i = 0; i < MSGSPERRM; i++)
   {
