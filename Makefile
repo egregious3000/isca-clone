@@ -43,7 +43,7 @@ NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup
 
 # \n to \r\n
 n2rn:
-       perl -pi.bak \
+	perl -pi.bak \
           -e "s/(?<!\\\\r)\\\\n/\\\\r\\\n/g" \
         ${NEWLINE_SRCS}
 
