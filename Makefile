@@ -43,7 +43,23 @@ NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup
 
 # \n to \r\n
 n2rn:
-	perl -pi.bak \
-          -e "s/(?<!\\\\r)\\\\n/\\\\r\\\n/g" \
+        # replace "\n" that is not following \r nor followed by '
+	perl -pi \
+	   -e "s/putchar\('\\\\n'\);/puts\(\"\\\\r\\\\n\"\);/g" \
+	${NEWLINE_SRCS}
+
+	perl -pi \
+	   -e "s/(?<!\\\\r)\\\\n(?!')/\\\\r\\\\n/g" \
         ${NEWLINE_SRCS}
+
+# \r\n to \n
+rn2n:
+	perl -pi.bak \
+	   -e "s/puts\(\"\\\\r\\\\n\"\);/putchar\('\\\\n'\);/g" \
+        ${NEWLINE_SRCS}
+
+	perl -pi.bak \
+           -e "s/\\\\r\\\\n/\\\\n/g" \
+        ${NEWLINE_SRCS}
+
 
