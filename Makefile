@@ -31,12 +31,15 @@ install:
 	mkdir -p /bbs/data
 	dd if=/dev/zero bs=35515 count=16   of=/bbs/data/tmpdata  2> /dev/null
 	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/msgdata  2> /dev/null
+        # set xmsgdata size
+	/bin/echo -ne "\x00p\x06"| dd of=/bbs/data/msgdata bs=16 seek=9  conv=notrunc
 	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/xmsgdata 2> /dev/null
 	dd if=/dev/zero bs=4096 count=50000 of=/bbs/data/userdata 2> /dev/null
 	rm -rf /bbs/message
 	mkdir -p /bbs/message
 	dd if=/dev/zero bs=4096 count=61036 of=/bbs/message/msgmain 2> /dev/null
-	# need to init xmsgdata size, and make FI directory
+	mkdir -p /bbs/message/desc
+	chown -R bbs /bbs
 
 NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup.c shell.c state.c system.c sysutil.c term.c update.c user.c users.c who.c xmsg.c
 
