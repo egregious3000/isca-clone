@@ -45,7 +45,7 @@ clone_populate_forums(void)
   }
 }
 
-char message_buffer[70000];
+char message_buffer[55000];
 
 void
 clone_populate_posts(void) {
@@ -64,15 +64,60 @@ clone_populate_posts(void) {
     return;
   }
 
+  int type = MES_NORMAL;
+  bzero(my_msg, 55000);
 
-  bzero(my_msg, 70000);
-  while (fgets(line, sizeof (line), f)) {
+  /* 32774. */
+  while (1) {
+    /*
+    char buf[20];
+
+    int thingy = ftell(f);
+    fseek(f, SEEK_SET, 32770);
+    fread(buf, sizeof (char), 19, f);
+    int ii;
+    for (ii = 0; ii < 19; ii++) {
+      printf("#%2d. %c %d\n", ii, buf[ii], buf[ii]);
+    }
+    fseek(f, SEEK_SET, thingy);
+    */
+    int ptr = 0;
+    int quit = 0;
+    printf("%9ld.\n", ftell(f)); 
+    fseek(f, SEEK_SET, ftell(f));
+
+    while (1) {
+      int c = fgetc(f);
+      if (c == -1) {
+	quit = 1;
+	break;
+      }
+      if (debug) printf("ptr is %d, c is %c %d.\n", ptr, c, c);
+      line[ptr] = c;
+      ptr++;
+      if (c == '\n') {
+	line[ptr] = 0;
+	break;
+      }
+    }
+    if (quit)
+      break;
+    if (0)
+      if (! fgets(line, sizeof (line), f))      break;
+    printf("%9ld->%s", ftell(f), line); 
     int length = strlen(line);
     if (line[0] == '.' && length == 2) {
-      if (1)      my_entermessage(forum, NULL, post, MES_NORMAL, author, date);
+      /* I am assuming that no author means anonymous.  An FM or a Sysop may actually have 
+         both the poster and the date available to him from the Raccdoc information. */
+      if (author == 0) {
+	author = 7; /* Is this the old "anonymous" user?  I think Guest was 6 and anon was 7. */
+	type = (forum == 7) ? MES_ANON : MES_AN2;
+      }
+      if (1)      my_entermessage(forum, NULL, post, type, author, date);
+      type = MES_NORMAL;
       forum = post = author = date = in_body = 0;
       my_msg = message_buffer;
-      bzero(my_msg, 70000);
+      bzero(my_msg, 55000);
       continue;
     }
     if (in_body)
@@ -81,6 +126,10 @@ clone_populate_posts(void) {
       forum = atoi(line + 7);
     if (strncmp(line, "POST: ", 6) == 0)
       post = atoi(line + 6);
+    if (strncmp(line, "SPECIAL: Forum", 14) == 0)
+      type = MES_FM;
+    if (strncmp(line, "SPECIAL: Sysop", 14) == 0)
+      type = MES_SYSOP;
     if (strncmp(line, "AUTHOR: ", 8) == 0)
       author = atoi(line + 8);
     if (strncmp(line, "DATE: ", 6) == 0)
@@ -148,8 +197,9 @@ clone_populate_users(void)
       }
     }
     if (strncmp("User# ", line, 6) == 0) {
+      char *pw = "abcdef";
       user_number = atoi(line+6);
-      if (TRUE) my_createuser(name, "abcdef", user_number, 
+      if (TRUE) my_createuser(name, pw, user_number, 
 		    "", "", "", "", "", "", "", sysop, 0, twit);
       if (FALSE) printf("Number: %6d  %s  %s  Name: %s\n", 
 			user_number, 
@@ -235,15 +285,21 @@ my_createuser(const char *name, const char *pas,  long usernum,
   COPY(phone);
   COPY(mail);
   ouruser->an_name = ouruser->an_addr = ouruser->an_location = ouruser->an_phone = ouruser->an_mail = anonymous;
-  ouruser->timescalled = 1;
+  ouruser->posted = 51; /* Avoid newbie prompts */
   ouruser->f_newbie = 0;
-  ouruser->f_prog = ouruser->f_admin = programmer; /* What is  f_admin ?? */
-  ouruser->f_aide = sysop;
+  ouruser->f_prog = ouruser->f_admin = ouruser->f_aide = programmer; 
+  ouruser->f_admin = ouruser->f_aide = sysop;
   ouruser->f_twit = twit;
   for (i = 5; i < MAXROOMS; i++)
     ouruser->generation[i] = ouruser->forget[i] = NEWUSERFORGET;
   ouruser->time = time(NULL);
   ouruser->usernum = usernum;
+
+  if (usernum == 7) {
+    /* Anonymous user given an un-enterable password */
+    strcpy(ouruser->passwd, "____");
+  }
+
 
   msync((void *)ouruser, sizeof(struct user), MS_SYNC);
 
