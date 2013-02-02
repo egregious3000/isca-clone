@@ -42,6 +42,7 @@ clone_populate_forums(void)
 	       
     my_createroom(topic, number, opt, flags);
     opt = '1';
+    flags = 0;
   }
 }
 
