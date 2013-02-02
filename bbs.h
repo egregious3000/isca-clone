@@ -431,13 +431,12 @@ struct userinfo
 
 struct xheader
 {
-  unsigned int checkbit:1;
-  unsigned int :6;
-  unsigned int type:3;
-  unsigned int smin:6;
-  unsigned int shour:5;
-  unsigned int rmin:6;
-  unsigned int rhour:5;
+  unsigned int checkbits:7;
+  unsigned int type:3;  /* 10 */
+  unsigned int smin:6;   /* 16 */
+  unsigned int shour:5;  /* 21 */ 
+  unsigned int rmin:6;  /* 27 */
+  unsigned int rhour:5; /* 32 */
   unsigned long snum;
   unsigned long rnum;
   long sprev;

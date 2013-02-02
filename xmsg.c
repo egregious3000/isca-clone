@@ -21,7 +21,7 @@ displayx(register long pos, register int num, register time_t *t, register long 
     return(1);
   }
 
-  if (!xh->checkbit)
+  if (xh->checkbits != 127)
   {
     errlog("X database check bit missing");
     return(-1);
@@ -93,6 +93,7 @@ displayx(register long pos, register int num, register time_t *t, register long 
   }
 
   printf("\n%s %s %s%s %s at %02d:%02d %s\n", sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"), xh->type == X_QUESTION ? "Question" : "Message", nstr, sender > 0 ? "to" : "from", sender > 0 ? getusername(xh->rnum, 1) : getusername(xh->snum, 1), xh->shour, xh->smin, sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"));
+
   s = (char *)(void *)(xh + 1);
   while (*s)
     s += printf("%c%s\n", sender > 0 ? '-' : (xh->type == X_QUESTION ? '%' : '>'), s) - 1;
@@ -363,7 +364,7 @@ register int wasbusy = 0;
   }
 
   tp = localtime(&t);
-  xh.checkbit = 1;
+  xh.checkbits = 127;
   xh.rnum = touser ? touser->usernum : 0;
   xh.snum = ouruser->usernum;
   xh.time = t;
@@ -411,8 +412,12 @@ register int wasbusy = 0;
     return;
   }
 
-  if (msg->xcurpos + 512 >= msg->xmsgsize || !msg->xcurpos)
+  if (msg->xcurpos + 512 >= msg->xmsgsize || !msg->xcurpos) {
+    /* It's not bad to do this. But if someone is scrolling our X buffer rapidly,
+       then they will trigger this a lot. */
+    errlog("INFO: x buffer wrapped around");
     msg->xcurpos = sizeof(long);
+  }
   curpos = msg->xcurpos;
   p = (char *)xmsg + curpos;
   bcopy((char *)&xh, p, sizeof xh);
@@ -812,7 +817,7 @@ xyell(register struct user *up, register unsigned char *p)
 
   for (xh = (struct xheader *)(void *)(xmsg + pos); pos; num--, (sender ? (pos = xh->sprev) : (pos = xh->rprev)), xh = (struct xheader *)(void *)(xmsg + pos))
   {
-    if (!xh->checkbit)
+    if (xh->checkbits != 127)
       return(-1);
     sender = 1;
     if (msg->xcurpos + (msg->xmsgsize >> 6) > (pos < msg->xcurpos ? pos + msg->xmsgsize : pos))
