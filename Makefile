@@ -31,9 +31,9 @@ install:
 	mkdir -p /bbs/data
 	dd if=/dev/zero bs=35515 count=16   of=/bbs/data/tmpdata  2> /dev/null
 	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/msgdata  2> /dev/null
-        # set xmsgdata size
-	/bin/echo -ne "\x00p\x06"| dd of=/bbs/data/msgdata bs=16 seek=9  conv=notrunc
-	dd if=/dev/zero bs=4096 count=103   of=/bbs/data/xmsgdata 2> /dev/null
+        # set xmsgdata size, we want "0000 0c35" in that location
+	/bin/echo -ne "\x00\x00\x35\x0c"| dd of=/bbs/data/msgdata bs=16 seek=9  conv=notrunc
+	dd if=/dev/zero bs=4096 count=50000 of=/bbs/data/xmsgdata 2> /dev/null
 	dd if=/dev/zero bs=4096 count=50000 of=/bbs/data/userdata 2> /dev/null
 	rm -rf /bbs/message
 	mkdir -p /bbs/message
