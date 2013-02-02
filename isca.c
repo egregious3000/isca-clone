@@ -93,7 +93,6 @@ clone_populate_posts(void) {
 	quit = 1;
 	break;
       }
-      if (debug) printf("ptr is %d, c is %c %d.\n", ptr, c, c);
       line[ptr] = c;
       ptr++;
       if (c == '\n') {
