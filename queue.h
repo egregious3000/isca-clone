@@ -4,7 +4,7 @@
 #define LIMITFILE	"/bbs/etc/limits"
 #define HELLOFILE	"/bbs/etc/hello"
 #define DOWNFILE	"/bbs/etc/down"
-#define PORT		24
+#define PORT		23
 #define MAXACTIVITY	60
 #define LOCAL(x)	((((x) >> 16) & ~0x0100) == 0x80ff)
 
