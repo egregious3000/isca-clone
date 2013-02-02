@@ -39,7 +39,12 @@ install:
 	mkdir -p /bbs/message
 	dd if=/dev/zero bs=4096 count=61036 of=/bbs/message/msgmain 2> /dev/null
 	mkdir -p /bbs/message/desc
+	rm -rf /bbs/help
+	mkdir -p /bbs/help
+	cp data/new.* /bbs/help
 	chown -R bbs /bbs
+	cp data/list data/profiles /tmp
+	cat data/posts-* > /tmp/posts
 
 NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup.c shell.c state.c system.c sysutil.c term.c update.c user.c users.c who.c xmsg.c
 
