@@ -168,7 +168,7 @@ extern void
         dontoption(int, int),
         drop(int),
         qinit(int),
-        logfatal(char *),
+        logfatal(char *, int),
         send_do(int, int, int),
         send_dont(int, int, int),
         send_will(int, int, int),

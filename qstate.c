@@ -180,7 +180,7 @@ gotiac:			switch (c) {
 			continue;
 
 		default:
-			logfatal("Illegal state.");
+		  logfatal("Illegal state.", 0);
 		}
 	}
 }

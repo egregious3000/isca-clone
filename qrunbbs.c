@@ -48,7 +48,7 @@ char *p;
     signal(SIGCLD, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
     if (fcntl(s, F_SETFL, 0) < 0)
-      logfatal("fcntl: %m");
+      logfatal("fcntl: ", errno);
     closelog();
      /*    close(0); */
     dup2(s, 0);
