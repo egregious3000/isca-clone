@@ -15,10 +15,10 @@ reap(register int unused)
 }
 
 
-
 void
 ring(register int unused)
 {
+  syslog(LOG_INFO, "f_qalarm is %d", f_qalarm);
   if (++f_qalarm > 4)
   {
     if (fork())
@@ -27,11 +27,17 @@ ring(register int unused)
       syslog(LOG_INFO, "Queue looping, aborting and performing restart...");
       dump(0);
     }
-    else
-      execl("/bbs/bin/bbs", "/bbs/bin/bbs", "-q", 0);
+    else {
+      char *envp[] = { NULL }; 
+      char *argv[] = { "/bbs/bin/bbs", "-q", NULL };
+      syslog(LOG_INFO, "launching bbs -q...");
+      int r = execve("/bbs/bin/bbs", argv, envp);
+      syslog(LOG_INFO, "launch failed!! %d %d", r, errno);
+    }
   }
+
   signal(SIGALRM, ring);
-  alarm(30);
+  /*  alarm(30); */
 }
 
 
@@ -91,7 +97,7 @@ int i;
   f_reread = 0;
   if (!(f = fopen(DOWNFILE, "r")))
     if (!(f = fopen(HELLOFILE, "r")))
-      logfatal("HELLOFILE fopen: %m");
+      logfatal("HELLOFILE fopen: ", errno);
     else
       q->down = 0;
   else
@@ -109,7 +115,7 @@ int i;
   fclose(f);
 
   if ((i = open(LIMITFILE, O_RDONLY)) < 0)
-    logfatal("LIMITFILE open: %m");
+    logfatal("LIMITFILE open: ", errno);
   read(i, buf, sizeof buf);
   close(i);
   syslog(LOG_INFO, "Lockout and limit frozen at -150 & on!");
@@ -160,21 +166,6 @@ restart(register int unused)
 
 
 void
-do_restart(void)
-{
-  char *newenv[2];
-
-  newenv[0] = "BBSQUEUED=1";
-  newenv[1] = 0;
-  environ = newenv;
-  syslog(LOG_INFO, "Restarting process");
-  execl("/bbs/bin/bbs", "/bbs/bin/bbs", "-q", 0);
-  syslog(LOG_ERR, "exec: %m");
-}
-
-
-
-void
 setup(register int unused)
 {
   f_quit = 1;
@@ -193,16 +184,16 @@ int on = 1;
   if (!close(0))
     syslog(LOG_INFO, "Rebound listener socket");
   if (socket(AF_INET, SOCK_STREAM, 0))
-    logfatal("socket: %m");
+    logfatal("socket: ", errno);
   if (setsockopt(0, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on))
-    logfatal("setsockopt: %m");
+    logfatal("setsockopt: ", errno);
   sa.sin_family = AF_INET;
   sa.sin_addr.s_addr = 0;
   sa.sin_port = htons(PORT);
   if (bind(0, &sa, sizeof sa))
-    logfatal("bind: %m");
+    logfatal("bind: ", errno);
   if (listen(0, SOMAXCONN))
-    logfatal("listen: %m");
+    logfatal("listen: ", errno);
   q->qt[0].last = time(0);
 }
 
@@ -356,12 +347,17 @@ dologin(register int c, register int x)
 
 
 void
-logfatal(char *error)
+logfatal(char *error, int number)
 {
+  syslog(LOG_INFO, "fatal");
   syslog(LOG_ERR, error);
-  syslog(LOG_INFO, "Starting fresh queue process upon death in 15 seconds...");
+  syslog(LOG_INFO, "fatal: %d %s", number, strerror(number));
+  syslog(LOG_INFO, "Starting a fresh queue process upon death in 15 seconds...");
   mysleep(15);
-  execl("/bbs/bin/bbs", "/bbs/bin/bbs", "-q", 0);
+  char *envp[] = { NULL };
+  char *argv[] = { "/bbs/bin/bbs", "-q", NULL };
+  int r = execve("/bbs/bin/bbs", argv, envp);
+  syslog(LOG_ERR, "could not restart!");
   _exit(1);
 }
 
