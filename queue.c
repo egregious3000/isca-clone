@@ -126,10 +126,8 @@ cap_t cap_data;
     printf("accept is %d\n", x);
     if (x == -1)
       continue;
-    printf("at line %d \n", __LINE__);
     if (setsockopt(x, SOL_SOCKET, SO_OOBINLINE, &i, sizeof i) < 0)
       {
-	printf("at line %d \n", __LINE__);
 	syslog(LOG_WARNING, "setsockopt on fd %d SO_OOBINLINE: %m", x);
 	if (close(x) < 0)
 	  syslog(LOG_WARNING, "SO_OOBINLINE failure: close: %m");
@@ -144,7 +142,6 @@ cap_t cap_data;
 	  syslog(LOG_WARNING, "SO_KEEPALIVE failure: close: %m");
 	continue;
       }
-    printf("at line %d \n", __LINE__);
     if (fcntl(x, F_SETFL, O_NONBLOCK) < 0)
       {
         syslog(LOG_WARNING, "fcntl on fd %d: %m", x);
@@ -152,9 +149,7 @@ cap_t cap_data;
           syslog(LOG_WARNING, "fcntl failure: close: %m");
 	continue;
       }
-    printf("at line %d \n", __LINE__);
     int d = (ssend(x, q->hello, q->hellolen - 1));
-    printf("d is %d\n", d);
     /* continue; */
     printf("at line %d \n", __LINE__);
     if (0) 
