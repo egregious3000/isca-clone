@@ -43,6 +43,7 @@ install:
 	mkdir -p /bbs/help
 	cp data/new.* /bbs/help
 	cp data/yell.* /bbs/help
+	cp data/guestwelcome /bbs/help
 	chown -R bbs /bbs
 	cp data/list data/profiles /tmp
 	cat data/posts-* > /tmp/posts
