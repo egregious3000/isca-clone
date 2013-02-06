@@ -134,7 +134,6 @@ cap_t cap_data;
 	continue;
       }
 
-    printf("at line %d \n", __LINE__);
     if (setsockopt(x, SOL_SOCKET, SO_KEEPALIVE, &i, sizeof i) < 0)
       {
 	syslog(LOG_WARNING, "setsockopt on fd %d SO_KEEPALIVE: %m", x);
@@ -151,11 +150,9 @@ cap_t cap_data;
       }
     int d = (ssend(x, q->hello, q->hellolen - 1));
     /* continue; */
-    printf("at line %d \n", __LINE__);
     if (0) 
       if (sa.sin_addr.s_addr != htonl(0x7f000001))
 	continue;
-    printf("at line %d \n", __LINE__);
 
     printf("closing\n");
 
