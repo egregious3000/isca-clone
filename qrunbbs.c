@@ -27,9 +27,7 @@ char *p;
     printf("s1 is %d\n", s);
     
     environ = newenv;
-    fprintf(stderr, "before forking");
     i = fork();
-    fprintf(stderr, "after forking");
     printf("FORK is %d\n", i); fflush(stdout);
     if (i < 0) {
       printf("Out of processes, sorry.\n");
