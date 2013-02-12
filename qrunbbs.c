@@ -23,18 +23,14 @@ char identname[16];
 int fds;
 char *p;
     printf("s0 is %d\n", s);
-    /*   s = 3; */
-    printf("s1 is %d\n", s);
     
     environ = newenv;
     i = fork();
-    printf("FORK is %d\n", i); fflush(stdout);
     if (i < 0) {
       printf("Out of processes, sorry.\n");
       return;
     }
     if (i > 0) {
-      printf("Forked, closing %d\n", s);
       close(s); 
       return;
     }

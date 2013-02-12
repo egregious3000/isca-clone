@@ -123,7 +123,6 @@ cap_t cap_data;
     printf("waiting for conection\n");
     struct sockaddr_in sa;
     x = accept(0, &sa, &socklen);
-    printf("accept is %d\n", x);
     if (x == -1)
       continue;
     if (setsockopt(x, SOL_SOCKET, SO_OOBINLINE, &i, sizeof i) < 0)
@@ -153,8 +152,6 @@ cap_t cap_data;
     if (0) 
       if (sa.sin_addr.s_addr != htonl(0x7f000001))
 	continue;
-
-    printf("closing\n");
 
     runbbs(x); 
   }
