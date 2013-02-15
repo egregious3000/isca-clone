@@ -120,7 +120,6 @@ cap_t cap_data;
     bigbtmp->queued = 0;
 
   while (1) {
-    printf("waiting for conection\n");
     struct sockaddr_in sa;
     x = accept(0, &sa, &socklen);
     if (x == -1)
