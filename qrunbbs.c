@@ -22,8 +22,6 @@ struct linger linger;
 char identname[16];
 int fds;
 char *p;
-    printf("s0 is %d\n", s);
-    
     environ = newenv;
     i = fork();
     if (i < 0) {
