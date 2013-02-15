@@ -436,10 +436,22 @@ register int i;
   msgpos = 0;
   linenbr = mh->mtype == MES_DESC ? 3 : 1;
 
-  for (;;)
-    if (!(i = *p++) || ((++msgpos, putchar(i)) == '\n' && ++linenbr >= rows - 1 && line_more(&linenbr, (msgpos * 100) / msgsize) < 0))
+  for (;;) {
+    int c;
+    if (!(i = *p++))
       break;
-
+    ++msgpos;
+    if (i == '\n') {
+      /* Important for n2rn */
+      c = putchar('\n');
+    } else {
+      c = putchar(i);
+    }
+    if (c == '\n') {
+      if (++linenbr >= rows - 1 && line_more(&linenbr, (msgpos * 100) / msgsize) < 0)
+	break;
+    }
+  }
   return(0);
 }
 
