@@ -92,12 +92,21 @@ displayx(register long pos, register int num, register time_t *t, register long 
     putchar(XMSG_S);
   }
 
-  printf("\n%s %s %s%s %s at %02d:%02d %s\n", sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"), xh->type == X_QUESTION ? "Question" : "Message", nstr, sender > 0 ? "to" : "from", sender > 0 ? getusername(xh->rnum, 1) : getusername(xh->snum, 1), xh->shour, xh->smin, sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"));
+  printf("\n%s %s %s%s %s at %02d:%02d %s\n",
+	 sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"), 
+	 xh->type == X_QUESTION ? "Question" : "Message",
+	 nstr,
+	 sender > 0 ? "to" : "from",
+	 sender > 0 ? getusername(xh->rnum, 1) : getusername(xh->snum, 1),
+	 xh->shour, xh->smin,
+	 sender > 0 ? "---" : (xh->type == X_QUESTION ? "%%%" : "***"));
 
   s = (char *)(void *)(xh + 1);
-  while (*s)
-    s += printf("%c%s\n", sender > 0 ? '-' : (xh->type == X_QUESTION ? '%' : '>'), s) - 1;
-
+  while (*s) {
+    s += printf("%c%s", sender > 0 ? '-' : (xh->type == X_QUESTION ? '%' : '>'), s);
+    putchar('\n');
+  }
+    
   if (client)
   {
     putchar(IAC);
