@@ -116,7 +116,7 @@ register int invalid = 0;
     p[-1] = 0;
 
   /* After every request for a name, give a CR */
-  /*  putchar('\r');  */
+  putchar('\r');
 
   return (pbuf);
 }
