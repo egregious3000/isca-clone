@@ -718,7 +718,8 @@ unsigned char *tmpsave;
           }
           for (i = 1; i < lnlngth; i++)
             *tmpp++ = thisline[i];
-          *tmpp++ = putchar(LF);
+	  putchar('\n');
+          *tmpp++ = '\n';
           for (lnlngth = 1; lnlngth + lastspace < MARGIN; lnlngth++)
           {
             i = thisline[lnlngth + lastspace];
@@ -730,7 +731,8 @@ unsigned char *tmpsave;
         {
           for (i = 1; i < MARGIN; i++)
             *tmpp++ = thisline[i];
-          *tmpp++ = putchar(LF);
+	  putchar('\n');
+          *tmpp++ = '\n';
           lastspace = 0;
           lnlngth = 1;
         }
@@ -749,7 +751,8 @@ unsigned char *tmpsave;
           ;
         for (i = 1; i <= lnlngth; i++)
           *tmpp++ = thisline[i];
-        *tmpp++ = putchar(LF);
+	putchar('\n');
+	*tmpp++ = '\n';
 	lastspace = lnlngth = 0;
 	if (chr == LF && (save || upload))
 	  continue;
