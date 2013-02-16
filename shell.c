@@ -154,6 +154,7 @@ char myname[MAXALIAS + 1];
 
     if (strcmp(name, "New"))
     {
+      putchar('\r');
       if ((tmpuser = getuser(name)))
         freeuser(tmpuser);
       if (tmpuser && (!bbsname || tty) && strcmp(name, "Guest"))
