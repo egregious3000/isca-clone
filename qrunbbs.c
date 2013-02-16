@@ -49,34 +49,24 @@ char *p;
      close(s);  
     /*    mysleep(40); */
 
-    fprintf(stderr, "\n\nbefore, y is %d\n\n\n", y);
-    
     bzero((char *)&sa, sizeof sa);
     fprintf(stderr, "hello there! %d\n", __LINE__);
     /*      if ((hp = gethostbyaddr((char *)&addr, 4, AF_INET))) */
     host = "unused";
     
-    fprintf(stderr, "hello there! %d\n", __LINE__);
     y = 0;
-    fprintf(stderr, "hello there! %d\n", __LINE__);
-    fprintf(stderr, "hello there! %d\n", __LINE__);
     /* 00 is the same as 01 */
     if (0) dup2(s, 1);
-    fprintf(stderr, "hello there! %d\n", __LINE__);
     if (0) dup2(s, 2);
-    fprintf(stderr, "hello there! %d\n", __LINE__);
     printf("s2 is %d\n", s);
     /* dup2(1, s); */
-    fprintf(stderr, "hello there! %d\n", __LINE__);
     for (i = 0; i < 4; i++)
       {
 	char *envp[] = { NULL };
 	char *argv[] = { "/bbs/bin/bbs", NULL };
 	int r = execve("/bbs/bin/bbs", argv, envp);
 	/*int r = execve("/bbs/bin/bbs", argv, envp);*/
-
 	/* 	int r = execl("/bin/ls", "/bin/ls", "-r", "-t", "-l", (char *) 0); */
-
 	/*	int r = execl("/bbs/bin/bbs", "1"); */
 	/* int r = execl(BBSEXEC, "1"); */
 	printf("r is %d\n", r); fflush(stdout);
