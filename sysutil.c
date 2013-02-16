@@ -594,12 +594,12 @@ register int noprint;
   }
 
   for (noprint = comments && *p == '#', line = i = 0; i < size; i++, p++) {
-    if (!noprint) 
+    if (!noprint)  {
       if (*p == '\n')
 	putchar('\n');
       else
 	putchar(*p);
-
+    }
     if (*p == '\n')
     {
       if (!noprint && ++line >= rows - 1 && line_more(&line, (i * 100) / size) < 0)
