@@ -23,6 +23,10 @@ char    bueller = 0;
   /* magic to set telnet into character mode */
   /* IAC  DO LINEMODE, IAC WILL ECHO */
   write(1,"\377\375\042\377\373\001",6);
+  /* let window sizes come through */
+  /* IAC DO NAWS */
+  write(1,"\377\375\037",3);
+
   reserve_slot();
   do_login();
 
