@@ -593,14 +593,21 @@ register int noprint;
     return;
   }
 
-  for (noprint = comments && *p == '#', line = i = 0; i < size; i++, p++)
-    if ((noprint ? *p : putchar(*p)) == '\n')
+  for (noprint = comments && *p == '#', line = i = 0; i < size; i++, p++) {
+    if (!noprint) 
+      if (*p == '\n')
+	putchar('\n');
+      else
+	putchar(*p);
+
+    if (*p == '\n')
     {
       if (!noprint && ++line >= rows - 1 && line_more(&line, (i * 100) / size) < 0)
         break;
       else
         noprint = comments && p[1] == '#';
     }
+  }
 
   putchar('\n');
   munmap((void *)filep, size);

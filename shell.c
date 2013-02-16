@@ -115,6 +115,9 @@ register int invalid = 0;
   if (p > pbuf && p[-1] == ' ')
     p[-1] = 0;
 
+  /* After every request for a name, give a CR */
+  /*  putchar('\r');  */
+
   return (pbuf);
 }
 
@@ -154,7 +157,6 @@ char myname[MAXALIAS + 1];
 
     if (strcmp(name, "New"))
     {
-      putchar('\r');
       if ((tmpuser = getuser(name)))
         freeuser(tmpuser);
       if (tmpuser && (!bbsname || tty) && strcmp(name, "Guest"))
