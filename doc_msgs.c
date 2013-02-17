@@ -443,11 +443,11 @@ register int i;
     ++msgpos;
     if (i == '\n') {
       /* Important for n2rn */
-      c = putchar('\n');
+      putchar('\n');
     } else {
-      c = putchar(i);
+      putchar(i);
     }
-    if (c == '\n') {
+    if (i == '\n') {
       if (++linenbr >= rows - 1 && line_more(&linenbr, (msgpos * 100) / msgsize) < 0)
 	break;
     }
