@@ -42,40 +42,28 @@ char *p;
     if (fcntl(s, F_SETFL, 0) < 0)
       logfatal("fcntl: ", errno);
     closelog();
-     /*    close(0); */
     dup2(s, 0);
     dup2(s, 1);
-    /*     dup2(s, 2); */
-     close(s);  
-    /*    mysleep(40); */
+    close(s);  
 
     bzero((char *)&sa, sizeof sa);
-    fprintf(stderr, "hello there! %d\n", __LINE__);
-    /*      if ((hp = gethostbyaddr((char *)&addr, 4, AF_INET))) */
+    /*     if ((hp = gethostbyaddr((char *)&addr, 4, AF_INET))) */
     host = "unused";
-    
+      
     y = 0;
-    /* 00 is the same as 01 */
     if (0) dup2(s, 1);
     if (0) dup2(s, 2);
-    printf("s2 is %d\n", s);
-    /* dup2(1, s); */
     for (i = 0; i < 4; i++)
       {
 	char *envp[] = { NULL };
 	char *argv[] = { "/bbs/bin/bbs", NULL };
 	int r = execve("/bbs/bin/bbs", argv, envp);
-	/*int r = execve("/bbs/bin/bbs", argv, envp);*/
-	/* 	int r = execl("/bin/ls", "/bin/ls", "-r", "-t", "-l", (char *) 0); */
-	/*	int r = execl("/bbs/bin/bbs", "1"); */
-	/* int r = execl(BBSEXEC, "1"); */
 	printf("r is %d\n", r); fflush(stdout);
 	printf("errno is %d\n", errno);fflush(stdout);
 	fprintf(stderr, "ERR\n"); fflush(stderr);
-        mysleep(1);
-	mysleep(30);
-
+        mysleep(5);
       }
+    /* We should never get here (unless execve fails) */ 
     send(0, BBSGONE, sizeof BBSGONE - 1, 0);
     mysleep(5);
     syslog(LOG_ERR, "Can't exec bbs!");
