@@ -44,9 +44,16 @@ install:
 	cp data/new.* /bbs/help
 	cp data/yell.* /bbs/help
 	cp data/guestwelcome /bbs/help
+	mkdir -p /bbs/etc
+	cp data/hello data/limits /bbs/etc
+	mkdir -p /bbs/bin
+	cp bbs /bbs/bin/bbs
 	chown -R bbs /bbs
 	cp data/list data/profiles /tmp
 	cat data/posts-* > /tmp/posts
+
+info:
+	cp desc/room* /bbs/message/desc
 
 NEWLINE_SRCS=doc_aide.c doc.c doc_msgs.c doc_rooms.c doc_routines.c main.c setup.c shell.c state.c system.c sysutil.c term.c update.c user.c users.c who.c xmsg.c
 

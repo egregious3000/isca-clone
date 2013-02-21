@@ -10,7 +10,9 @@ make
 make install
 ./bbs # make your first user who will be programmer, then logout
 ./bbs -c # this "clones" data, see below
+make info # install forum information
 ./bbs -q # I do this inside a 'screen' so I can watch for error output
+
 
 That's the theory.  I haven't done a completely clean install in a
 while so maybe I missed something in /bbs from the "make install"
