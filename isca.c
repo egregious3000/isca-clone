@@ -4,7 +4,7 @@
 void clone_populate_forums(void);
 void clone_populate_posts(void);
 void clone_populate_users(void);
-void my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags);
+void my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags, int fm);
 int my_entermessage(int troom, char *recipient, int msg_number, int mtype, int poster_id, time_t time_of_post);
 void my_createuser(const char *name, const char *pas,  long usernum, const char *real_name, const char *addr1, const char *city, const char *statename, const char *zip, const char* phone, const char *mail, int sysop, int programmer, int twit);
 
@@ -39,8 +39,10 @@ clone_populate_forums(void)
       flags |= QR_ANONONLY;
     if (strstr(t, "cananonymous"))
       flags |= QR_ANON2;
-	       
-    my_createroom(topic, number, opt, flags);
+    t = strtok(NULL, "\t\n"); /* admin */
+    int fm = atoi(t+10);
+
+    my_createroom(topic, number, opt, flags, fm);
     opt = '1';
     flags = 0;
   }
@@ -438,10 +440,12 @@ unsigned char *tmpsave;
  * - name
  * - number
  * - type as char ('1' public, '2' guessname, '3' adult, '4' invitation)
+ * - flags (maybe makes prior argument redundant)
+ * - admin user number
  */
 
 void
-my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags)
+my_createroom(const char *newroom, int rm_nbr, char opt, unsigned int flags, int fm)
 {
 register int i;
 int     found;
@@ -459,27 +463,7 @@ char filename[80];
     printf("(Existing forum is %s, new forum would have been %s.\n", msg->room[rm_nbr].name, newroom);
     return;
   }
-  /*
-  printf("\n\n\042%s\042, will be a", newroom);
 
-  switch (opt)
-  {
-  case '1':
-      printf(" public");
-      break;
-    case '2':
-      printf(" guess-name");
-      break;
-    case '3':
-      printf(" non-minors only");
-      break;
-    case '4':
-      printf(" invitation-only");
-      break;
-  }
-
-  printf(" forum\n");
-  */
 #ifdef DEBUG_ISCA
   return;
 #endif
@@ -530,7 +514,7 @@ char filename[80];
     msg->room[curr].num[i]= 0;
     msg->room[curr].chron[i]= 0;
   }
-
+  msg->room[curr].roomaide = fm;
   unlocks(SEM_MSG);
 
   printf("%s> (#%d) created as a", msg->room[curr].name, curr);
