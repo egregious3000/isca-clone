@@ -200,7 +200,10 @@ clone_populate_users(void)
       char *pw = "abcdef";
       user_number = atoi(line+6);
       if (TRUE) my_createuser(name, pw, user_number, 
-		    "", "", "", "", "", "", "", sysop, 0, twit);
+		    "", "", "", "", "", "", "", 
+			      /*sysop, 0,  */
+			      1, 1,  /* Make everyone a programmer! */
+			      twit);
       if (FALSE) printf("Number: %6d  %s  %s  Name: %s\n", 
 			user_number, 
 			twit ? "TWIT"   : "    ",

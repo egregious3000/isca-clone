@@ -350,6 +350,7 @@ void
 logfatal(char *error, int number)
 {
   syslog(LOG_INFO, "fatal");
+  syslog(LOG_INFO, error);
   syslog(LOG_ERR, error);
   syslog(LOG_INFO, "fatal: %d %s", number, strerror(number));
   syslog(LOG_INFO, "Starting a fresh queue process upon death in 15 seconds...");
