@@ -6,6 +6,7 @@ Clone of ISCA BBS
 
 To install:
 
+make n2rn # change \n into \r\n everywhere; "make rn2n" undoes
 make
 make install
 ./bbs # make your first user who will be programmer, then logout
