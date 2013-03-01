@@ -3,14 +3,14 @@
 
 /* I think this is run by the queue when someone connects.  "s" is a socket. */
 void
-runbbs(int s)
+runbbs(int s, unsigned long connect_addr)
 {
   int q;
 int len;
 int i, j;
 char str[160];
 struct hostent *hp;
-char *host;
+ char host[40];
 int y;
 u_long addr;
 u_short port;
@@ -46,17 +46,24 @@ char *p;
     dup2(s, 1);
     close(s);  
 
-    bzero((char *)&sa, sizeof sa);
-    /*     if ((hp = gethostbyaddr((char *)&addr, 4, AF_INET))) */
-    host = "unused";
-      
+    /*     struct sockaddr bob = (struct sockaddr) connect_addr; */
+    /*     addr = connect_addr.sin_addr.s_addr; */
+    addr = connect_addr;
+    printf(" show 0x%0lx\n", addr);
+    unsigned char *addrs = &addr;
+    /*    hp = gethostbyaddr(&addr, 4, AF_INET); */
+    snprintf(host, sizeof host, "%d.%d.%d.%d", addrs[0], addrs[1], addrs[2], addrs[3] );
+    /*    hp = gethostbyaddr((char *)&connect_addr, 4, AF_INET); */
+    /*      strncpy(host, hp->h_name, sizeof host);
+	      else */
+    
     y = 0;
     if (0) dup2(s, 1);
     if (0) dup2(s, 2);
     for (i = 0; i < 4; i++)
       {
 	char *envp[] = { NULL };
-	char *argv[] = { "/bbs/bin/bbs", NULL };
+	char *argv[] = { "/bbs/bin/bbs", host, "arg1", "arg2", NULL };
 	int r = execve("/bbs/bin/bbs", argv, envp);
 	printf("r is %d\n", r); fflush(stdout);
 	printf("errno is %d\n", errno);fflush(stdout);

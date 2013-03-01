@@ -152,7 +152,8 @@ cap_t cap_data;
       if (sa.sin_addr.s_addr != htonl(0x7f000001))
 	continue;
 
-    runbbs(x); 
+
+    runbbs(x, sa.sin_addr.s_addr); 
   }
 }
 

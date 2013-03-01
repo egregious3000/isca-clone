@@ -465,7 +465,7 @@ qinit(register int x)
 
 		case T_INIT5:
 			q->qt[x].initstate = 0;
-			runbbs(x);
+			/* 			runbbs(x); */
 			/* FALL THRU */
 
 		default:

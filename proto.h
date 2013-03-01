@@ -161,7 +161,7 @@ void s_sigalrm2(int);
 
 /* queue stuff */
 extern void
-        runbbs(int),
+        runbbs(int, unsigned long),
         checkauth(int),
         dologin(int, int),
         dooption(int, int),
