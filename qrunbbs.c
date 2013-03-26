@@ -3,7 +3,7 @@
 
 /* I think this is run by the queue when someone connects.  "s" is a socket. */
 void
-runbbs(int s, unsigned long connect_addr)
+runbbs(int s, unsigned long connect_addr, int client)
 {
   int q;
 int len;
@@ -60,10 +60,11 @@ char *p;
     y = 0;
     if (0) dup2(s, 1);
     if (0) dup2(s, 2);
+
     for (i = 0; i < 4; i++)
       {
 	char *envp[] = { NULL };
-	char *argv[] = { "/bbs/bin/bbs", host, "arg1", "arg2", NULL };
+	char *argv[] = { client ? CLIENTARG : BBSARG, host, NULL }; /* 3rd arg is remote username */
 	int r = execve("/bbs/bin/bbs", argv, envp);
 	printf("r is %d\n", r); fflush(stdout);
 	printf("errno is %d\n", errno);fflush(stdout);

@@ -146,14 +146,42 @@ cap_t cap_data;
           syslog(LOG_WARNING, "fcntl failure: close: %m");
 	continue;
       }
-    int d = (ssend(x, q->hello, q->hellolen - 1));
-    /* continue; */
-    if (0) 
-      if (sa.sin_addr.s_addr != htonl(0x7f000001))
-	continue;
+    ssend(x, q->hello, q->hellolen - 1);
 
+    struct timeval halfsecond;
+    halfsecond.tv_sec = 0;
+    halfsecond.tv_usec = 500000;
 
-    runbbs(x, sa.sin_addr.s_addr); 
+    select(0, NULL, NULL, NULL, &halfsecond);
+
+    
+    q->qt[x].conn = q->qt[x].last = q->t;
+    q->qt[x].netip = q->qt[x].netibuf;
+    q->qt[x].nfrontp = q->qt[x].nbackp = q->qt[x].netobuf;
+    q->qt[x].subpointer = q->qt[x].subend = q->qt[x].subbuffer;
+    *q->qt[x].remoteusername = 0;
+    q->qt[x].rows = 24;
+    q->qt[x].initstate = T_INIT1;
+    q->qt[x].state = TS_DATA;
+    for (i = 0; i < sizeof q->qt[0].options; i++)
+      q->qt[x].options[i] = q->qt[x].do_dont_resp[i] = q->qt[x].will_wont_resp[i] = 0;
+    q->qt[x].ncc = 0;
+    q->qt[x].addr = ntohl(sa.sin_addr.s_addr);
+    q->qt[x].port = ntohs(sa.sin_port);
+    q->qt[x].acc = 0;
+    q->qt[x].login = 0;
+    q->qt[x].sgaloop = 0;
+    q->qt[x].echoloop = 0;
+    q->qt[x].client = 0;
+    q->qt[x].checkup = 0;
+    q->qt[x].new = 0;
+    q->qt[x].wasinq = 0;
+    
+    q->qt[x].ncc = recv(x, q->qt[x].netibuf, sizeof q->qt[x].netibuf, 0);
+
+    qtelrcv(x); 
+    printf("client is %d\n", q->qt[x].client); fflush(stdout);
+    runbbs(x, sa.sin_addr.s_addr, q->qt[x].client); 
   }
 }
 
